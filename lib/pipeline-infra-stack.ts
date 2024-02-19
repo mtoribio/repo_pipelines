@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as codecommit from 'aws-cdk-lib/aws-codecommit';
 import { Construct } from 'constructs';
 import { createName } from '../utils/createName';
-import { Pipeline } from 'aws-cdk-lib/aws-codepipeline';
+import { Pipeline, PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { infraBuildActions } from './pipelinebuildactions/infra-actions';
 
 export interface InfraPipelineStackProps extends cdk.StackProps {
@@ -31,6 +31,7 @@ export class InfraPipelineStack extends cdk.Stack {
 		// Create CodePipeline
 		new Pipeline(this, 'InfraPipeline', {
 			pipelineName: createName('codepipeline', 'infra-pipeline'),
+			pipelineType: PipelineType.V1,
 			enableKeyRotation: true,
 			stages: [
 				{

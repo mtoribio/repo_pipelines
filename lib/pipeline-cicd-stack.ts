@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as codecommit from 'aws-cdk-lib/aws-codecommit';
 import { Construct } from 'constructs';
 import { createName } from '../utils/createName';
-import { Pipeline } from 'aws-cdk-lib/aws-codepipeline';
+import { Pipeline, PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { cicdBuildActions } from './pipelinebuildactions/cicd-actions';
 
 export interface CiCdBuildActionsProps extends cdk.StackProps {
@@ -31,6 +31,7 @@ export class CiCdPipelineStack extends cdk.Stack {
 		// Create CodePipeline
 		new Pipeline(this, 'CiCdPipeline', {
 			pipelineName: createName('codepipeline', 'cicd-pipeline'),
+			pipelineType: PipelineType.V1,
 			enableKeyRotation: true,
 			stages: [
 				{
