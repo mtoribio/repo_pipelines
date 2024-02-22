@@ -21,11 +21,11 @@ export const infraBuildActions = (scope: Construct, props: InfraBuildActionsProp
 	const projects = infraBuildProjects(scope);
 
 	// Conectar al repositorio en Github
-	const nameParameter = createName('ps', 'infra-conn-arn');
-	const connectionArn = ssm.StringParameter.fromStringParameterName(scope, 'InfraConnARN', nameParameter).stringValue;
+	const nameParameter = createName('ps', 'conn-arn');
+	const connectionArn = ssm.StringParameter.fromStringParameterName(scope, 'ConnARN', nameParameter).stringValue;
 
 	// Artifact del Source
-	const nameSourceArtifact = createName('artifact', 'infra-connection');
+	const nameSourceArtifact = createName('artifact', 'infra-source');
 	const sourceArtifact = new Artifact(nameSourceArtifact);
 	// CodeStarConnections action
 	const source = new CodeStarConnectionsSourceAction({
