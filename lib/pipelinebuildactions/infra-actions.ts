@@ -1,5 +1,9 @@
 import { Artifact } from 'aws-cdk-lib/aws-codepipeline';
-import { CodeStarConnectionsSourceAction, CodeBuildAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import {
+	CodeStarConnectionsSourceAction,
+	CodeBuildAction,
+	ManualApprovalAction,
+} from 'aws-cdk-lib/aws-codepipeline-actions';
 import { infraBuildProjects } from '../pipelinebuildprojects/infra-projects';
 import { createName } from '../../utils/createName';
 import { Construct } from 'constructs';
@@ -70,6 +74,22 @@ export const infraBuildActions = (scope: Construct, props: InfraBuildActionsProp
 		input: buildArtifactSynth,
 	});
 
+	// CodeBuild action PreDeploy
+	const preDeploy = new CodeBuildAction({
+		actionName: createName('codebuild', 'infra-predeploy-action'),
+		project: projects.preDeploy,
+		input: buildArtifactSynth,
+	});
+
+	// CodeBuild action Manual Approval
+	const manualApproval = new ManualApprovalAction({
+		actionName: createName('codebuild', 'infra-manual-approval'),
+		additionalInformation: `Aprueba este paso si:
+
+			1. Se ha importado los certificados en AWS ACM (N. Virginia y Ohio) y almacenado los ARN de los certificados en Parameter Store de AWS Systems Manager (manual, solo se realiza la primera vez que se construye la infraestructura, en caso contrario omitir).
+			2. Se ha subido una imagen al respositorio.`,
+	});
+
 	// CodeBuild action Deploy
 	const deploy = new CodeBuildAction({
 		actionName: createName('codebuild', 'infra-deploy-action'),
@@ -83,6 +103,8 @@ export const infraBuildActions = (scope: Construct, props: InfraBuildActionsProp
 		synth,
 		unitTest,
 		security,
+		preDeploy,
+		manualApproval,
 		deploy,
 	};
 };

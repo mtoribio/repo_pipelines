@@ -102,6 +102,50 @@ export const infraBuildProjects = (scope: Construct) => {
 		}),
 	});
 
+	// Crear un CodeBuild para el PreDeploy
+	const networkStack = createName('stack', 'network');
+	const repositoryStack = createName('stack', 'repository');
+	const databaseStack = createName('stack', 'database');
+	const emailStack = createName('stack', 'email');
+	const sandboxStack = createName('stack', 'sandbox');
+	const preDeploy = new PipelineProject(scope, 'CodeBuildInfraProjectPreDeploy', {
+		projectName: createName('codebuild', 'infra-predeploy'),
+		environment: {
+			buildImage: LinuxBuildImage.STANDARD_6_0,
+		},
+		timeout: cdk.Duration.minutes(100),
+		buildSpec: BuildSpec.fromObject({
+			version: '0.2',
+			phases: {
+				install: {
+					'runtime-versions': {
+						nodejs: '16',
+					},
+					commands: ['node -v'],
+				},
+				build: {
+					commands: [
+						'rm -rf node_modules',
+						'sudo npm install -g aws-cdk',
+						'npm install',
+						`cdk deploy ${networkStack} --method=direct --require-approval never`,
+						`cdk deploy ${repositoryStack} --method=direct --require-approval never`,
+						`cdk deploy ${databaseStack} --method=direct --require-approval never`,
+						`cdk deploy ${emailStack} --method=direct --require-approval never`,
+						`cdk deploy ${sandboxStack} --method=direct --require-approval never`,
+					],
+				},
+			},
+		}),
+	});
+
+	preDeploy.addToRolePolicy(
+		new iam.PolicyStatement({
+			actions: ['sts:AssumeRole'],
+			resources: ['*'],
+		})
+	);
+
 	// Crear un CodeBuild para Deploy
 	const deploy = new PipelineProject(scope, 'CodeBuildInfraProjectDeploy', {
 		projectName: createName('codebuild', 'infra-deploy'),
@@ -143,6 +187,7 @@ export const infraBuildProjects = (scope: Construct) => {
 		synth,
 		unitTest,
 		security,
+		preDeploy,
 		deploy,
 	};
 };

@@ -55,6 +55,14 @@ export class InfraPipelineStack extends cdk.Stack {
 					actions: [actions.security],
 				},
 				{
+					stageName: createName('stage', 'predeploy'),
+					actions: [actions.preDeploy],
+				},
+				{
+					stageName: createName('stage', 'manual-approval'),
+					actions: [actions.manualApproval],
+				},
+				{
 					stageName: createName('stage', 'deploy'),
 					actions: [actions.deploy],
 				},
