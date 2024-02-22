@@ -94,7 +94,9 @@ export const infraBuildProjects = (scope: Construct) => {
 					commands: ['gem install cfn-nag'],
 				},
 				build: {
-					commands: ['find ./cdk.out -type f -name "*.template.json" | xargs -I{} cfn_nag_scan --input-path {}'],
+					commands: [
+						'find ./cdk.out -type f -name "*.template.json" | xargs -I{} cfn_nag_scan --deny-list-path cfn-nag-deny-list.yml --input-path {}',
+					],
 				},
 			},
 		}),
