@@ -156,6 +156,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 
 	const envId = createName('sm', 'env');
 	const nameRepository = createName('ecr', 'repository');
+	const dbCredentials = createName('aurora-mysql', 'password');
+	const sesCredentials = createName('sm', 'smtp-credentials');
 	// Crear un CodeBuild para Build
 	const build = new PipelineProject(scope, 'CodeBuildProjectBuild', {
 		projectName: createName('codebuild', 'build'),
@@ -175,8 +177,27 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				},
 				build: {
 					commands: [
-						`SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id ${envId} --query SecretString --output text)`,
-						'echo "$SECRET_VALUE" > .env',
+						`ENV_TEMPLATE=$(aws secretsmanager get-secret-value --secret-id ${envId} --query SecretString --output text)`,
+						'echo "$ENV_TEMPLATE" > .env',
+						'sudo apt-get install jq',
+						`SES_CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${sesCredentials} --query SecretString --output text)`,
+						'MAIL_USERNAME=$(echo $SES_CREDENTIALS | jq -r ".username")',
+						'MAIL_PASSWORD=$(echo $SES_CREDENTIALS | jq -r ".password")',
+						'echo "MAIL_USERNAME=$MAIL_USERNAME" >> .env',
+						'echo "MAIL_PASSWORD=$MAIL_PASSWORD" >> .env',
+						`DB_CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id ${dbCredentials} --query SecretString --output text)`,
+						'DB_CONNECTION=$(echo $DB_CREDENTIALS | jq -r ".engine")',
+						'DB_HOST=$(echo $DB_CREDENTIALS | jq -r ".host")',
+						'DB_PORT=$(echo $DB_CREDENTIALS | jq -r ".port")',
+						'DB_DATABASE=$(echo $DB_CREDENTIALS | jq -r ".dbname")',
+						'DB_USERNAME=$(echo $DB_CREDENTIALS | jq -r ".username")',
+						'DB_PASSWORD=$(echo $DB_CREDENTIALS | jq -r ".password")',
+						'echo "DB_CONNECTION=$DB_CONNECTION" >> .env',
+						'echo "DB_HOST=$DB_HOST" >> .env',
+						'echo "DB_PORT=$DB_PORT" >> .env',
+						'echo "DB_DATABASE=$DB_DATABASE" >> .env',
+						'echo "DB_USERNAME=$DB_USERNAME" >> .env',
+						'echo "DB_PASSWORD=$DB_PASSWORD" >> .env',
 						`docker build -t ${nameRepository} .`,
 						`docker tag ${nameRepository}:latest ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
 						`docker push ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
