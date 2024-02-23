@@ -52,7 +52,7 @@ export class AppPipelineStack extends cdk.Stack {
 					actions: [actions.security],
 				},
 				{
-					stageName: createName('stage', 'manual-approval'),
+					stageName: createName('stage', 'manual-approval-prebuild'),
 					actions: [actions.manualApprovalPreBuild],
 				},
 				{
@@ -60,7 +60,7 @@ export class AppPipelineStack extends cdk.Stack {
 					actions: [actions.build],
 				},
 				{
-					stageName: createName('stage', 'manual-approval'),
+					stageName: createName('stage', 'manual-approval-predeploy'),
 					actions: [actions.manualApprovalPreDeploy],
 				},
 				{

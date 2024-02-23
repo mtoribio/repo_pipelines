@@ -90,7 +90,7 @@ export const appBuildActions = (scope: Construct, props: AppBuildActionsProps) =
 		actionName: createName('codebuild', 'app-manual-approval-postbuild'),
 		additionalInformation: `Aprueba este paso si:
 
-		1. Se ha finalizado el pipeline de la infraestructura.`,
+		1. Se ha desplegado el stack de los contenedores.`,
 	});
 
 	// CodeBuild action Deploy
