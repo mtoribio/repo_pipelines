@@ -44,6 +44,10 @@ export class AppPipelineStack extends cdk.Stack {
 					actions: [actions.linting],
 				},
 				{
+					stageName: createName('stage', 'synth'),
+					actions: [actions.synth],
+				},
+				{
 					stageName: createName('stage', 'unit-test'),
 					actions: [actions.unitTest],
 				},
@@ -52,20 +56,20 @@ export class AppPipelineStack extends cdk.Stack {
 					actions: [actions.security],
 				},
 				{
-					stageName: createName('stage', 'manual-approval-prebuild'),
-					actions: [actions.manualApprovalPreBuild],
+					stageName: createName('stage', 'deploy-wave-1'),
+					actions: [actions.deployWave1],
 				},
 				{
 					stageName: createName('stage', 'build'),
 					actions: [actions.build],
 				},
 				{
-					stageName: createName('stage', 'manual-approval-predeploy'),
-					actions: [actions.manualApprovalPreDeploy],
+					stageName: createName('stage', 'manual-approval'),
+					actions: [actions.manualApproval],
 				},
 				{
-					stageName: createName('stage', 'deploy'),
-					actions: [actions.deploy],
+					stageName: createName('stage', 'deploy-wave-2'),
+					actions: [actions.deployWave2],
 				},
 			],
 		});

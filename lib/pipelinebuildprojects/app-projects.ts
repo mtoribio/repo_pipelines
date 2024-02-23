@@ -18,10 +18,10 @@ export interface AppBuildProjectsProps {
 
 export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps) => {
 	// Crear un CodeBuild para Linting
-	const linter = new PipelineProject(scope, 'CodeBuildAppProjectLinting', {
-		projectName: createName('codebuild', 'app-linting'),
+	const linter = new PipelineProject(scope, 'CodeBuildProjectLinting', {
+		projectName: createName('codebuild', 'linting'),
 		environment: {
-			buildImage: LinuxBuildImage.fromCodeBuildImageId('aws/codebuild/amazonlinux2-aarch64-standard:3.0'),
+			buildImage: LinuxBuildImage.STANDARD_7_0,
 		},
 		timeout: cdk.Duration.minutes(100),
 		buildSpec: BuildSpec.fromObject({
@@ -29,22 +29,48 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 			phases: {
 				install: {
 					'runtime-versions': {
-						php: '8.1',
 						nodejs: '18',
 					},
-					// commands: ['composer install', 'npm install -g eslint', 'npm install eslint-plugin-php'],
+					commands: ['node -v'],
 				},
 				build: {
-					// commands: ['php artisan lint'],
-					commands: ['echo "Aquí debe configurar el linter'],
+					commands: ['cd .\\cdk-code\\', 'npm install', 'npm run eslint'],
 				},
 			},
 		}),
 	});
 
+	// Crear un CodeBuild para Synth
+	const synth = new PipelineProject(scope, 'CodeBuildProjectSynth', {
+		projectName: createName('codebuild', 'synth'),
+		environment: {
+			buildImage: LinuxBuildImage.STANDARD_7_0,
+		},
+		timeout: cdk.Duration.minutes(100),
+		buildSpec: BuildSpec.fromObject({
+			version: '0.2',
+			phases: {
+				install: {
+					'runtime-versions': {
+						nodejs: '18',
+					},
+					commands: ['node -v'],
+				},
+				build: {
+					commands: ['cd .\\cdk-code\\', 'npm install', 'cdk synth'],
+				},
+			},
+			artifacts: {
+				'base-directory': '.',
+				files: ['**/*'],
+				'exclude-paths': ['node_modules/**'],
+			},
+		}),
+	});
+
 	// Crear un CodeBuild para Unit Test
-	const unitTest = new PipelineProject(scope, 'CodeBuildAppProjectUnitTest', {
-		projectName: createName('codebuild', 'app-unit-test'),
+	const unitTest = new PipelineProject(scope, 'CodeBuildProjectUnitTest', {
+		projectName: createName('codebuild', 'unit-test'),
 		environment: {
 			buildImage: LinuxBuildImage.STANDARD_7_0,
 		},
@@ -60,35 +86,10 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 	});
 
 	// Crear un CodeBuild para Security
-	const security = new PipelineProject(scope, 'CodeBuildAppProjectSecurity', {
-		projectName: createName('codebuild', 'app-security'),
+	const security = new PipelineProject(scope, 'CodeBuildProjectSecurity', {
+		projectName: createName('codebuild', 'security'),
 		environment: {
 			buildImage: LinuxBuildImage.STANDARD_7_0,
-		},
-		environmentVariables: {
-			SONAR_HOST_URL: { value: 'URL_de_tu_servidor_de_SonarQube' },
-			SONAR_LOGIN: { value: 'token_de_autenticacion_de_SonarQube' },
-		},
-		timeout: cdk.Duration.minutes(100),
-		buildSpec: BuildSpec.fromObject({
-			version: '0.2',
-			phases: {
-				build: {
-					// commands: ['npm install -g sonarqube-scanner', 'sonar-scanner'],
-					commands: ['echo "Aquí debe configurar el sonarqube para su proyecto"'],
-				},
-			},
-		}),
-	});
-
-	const envId = createName('sm', 'env');
-	const nameRepository = createName('ecr', 'repository');
-	// Crear un CodeBuild para Build
-	const build = new PipelineProject(scope, 'CodeBuildAppProjectBuild', {
-		projectName: createName('codebuild', 'app-build'),
-		environment: {
-			buildImage: LinuxBuildImage.STANDARD_7_0,
-			privileged: true,
 		},
 		timeout: cdk.Duration.minutes(100),
 		buildSpec: BuildSpec.fromObject({
@@ -96,37 +97,28 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 			phases: {
 				install: {
 					'runtime-versions': {
-						nodejs: '18',
+						ruby: '3.2',
 					},
-					commands: ['node -v', 'sudo npm install -g aws-cdk', 'npm install'],
+					commands: ['gem install cfn-nag'],
 				},
 				build: {
 					commands: [
-						`SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id ${envId} --query SecretString --output text)`,
-						'echo "$SECRET_VALUE" > .env',
-						`docker build -t ${nameRepository} .`,
-						`docker tag ${nameRepository}:latest ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
-						`docker push ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
+						'cd .\\cdk-code\\',
+						'find ./cdk.out -type f -name "*.template.json" | xargs -I{} cfn_nag_scan --deny-list-path cfn-nag-deny-list.yml --input-path {}',
 					],
 				},
-			},
-			artifacts: {
-				'base-directory': '.',
-				files: ['**/*'],
-				'exclude-paths': ['node_modules/**'],
 			},
 		}),
 	});
 
-	const nameContainer = createName('ecs', 'container');
-	const taskDefinitionFamily = createName('ecs', 'task');
-	const nameGroupLogs = createName('cw', 'ecs-logs');
-	const nameTaskRole = createName('iam', 'task-execution-role');
-	const nameCluster = createName('ecs', 'cluster');
-	const nameService = createName('ecs', 'service');
-	// Crear un CodeBuild para Deploy
-	const deploy = new PipelineProject(scope, 'CodeBuildAppProjectDeploy', {
-		projectName: createName('codebuild', 'app-deploy'),
+	// Crear un CodeBuild para el Deploy Wave 1
+	const networkStack = createName('stack', 'network');
+	const repositoryStack = createName('stack', 'repository');
+	const databaseStack = createName('stack', 'database');
+	const emailStack = createName('stack', 'email');
+	const sandboxStack = createName('stack', 'sandbox');
+	const deployWave1 = new PipelineProject(scope, 'CodeBuildProjectDeployWave1', {
+		projectName: createName('codebuild', 'deploy-wave-1'),
 		environment: {
 			buildImage: LinuxBuildImage.STANDARD_7_0,
 		},
@@ -142,6 +134,85 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				},
 				build: {
 					commands: [
+						'cd .\\cdk-code\\',
+						'npm install',
+						`cdk deploy ${networkStack} --method=direct --require-approval never`,
+						`cdk deploy ${repositoryStack} --method=direct --require-approval never`,
+						`cdk deploy ${databaseStack} --method=direct --require-approval never`,
+						`cdk deploy ${emailStack} --method=direct --require-approval never`,
+						`cdk deploy ${sandboxStack} --method=direct --require-approval never`,
+					],
+				},
+			},
+		}),
+	});
+
+	deployWave1.addToRolePolicy(
+		new iam.PolicyStatement({
+			actions: ['sts:AssumeRole'],
+			resources: ['*'],
+		})
+	);
+
+	const envId = createName('sm', 'env');
+	const nameRepository = createName('ecr', 'repository');
+	// Crear un CodeBuild para Build
+	const build = new PipelineProject(scope, 'CodeBuildProjectBuild', {
+		projectName: createName('codebuild', 'build'),
+		environment: {
+			buildImage: LinuxBuildImage.STANDARD_7_0,
+			privileged: true,
+		},
+		timeout: cdk.Duration.minutes(100),
+		buildSpec: BuildSpec.fromObject({
+			version: '0.2',
+			phases: {
+				install: {
+					'runtime-versions': {
+						nodejs: '18',
+					},
+					commands: ['node -v', 'npm install'],
+				},
+				build: {
+					commands: [
+						`SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id ${envId} --query SecretString --output text)`,
+						'echo "$SECRET_VALUE" > .env',
+						`docker build -t ${nameRepository} .`,
+						`docker tag ${nameRepository}:latest ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
+						`docker push ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
+					],
+				},
+			},
+		}),
+	});
+
+	const nameContainer = createName('ecs', 'container');
+	const taskDefinitionFamily = createName('ecs', 'task');
+	const nameGroupLogs = createName('cw', 'ecs-logs');
+	const nameTaskRole = createName('iam', 'task-execution-role');
+	const nameCluster = createName('ecs', 'cluster');
+	const nameService = createName('ecs', 'service');
+	// Crear un CodeBuild para Deploy Wave 2
+	const deployWave2 = new PipelineProject(scope, 'CodeBuildAppProjectDeployWave2', {
+		projectName: createName('codebuild', 'deploy-wave-2'),
+		environment: {
+			buildImage: LinuxBuildImage.STANDARD_7_0,
+		},
+		timeout: cdk.Duration.minutes(100),
+		buildSpec: BuildSpec.fromObject({
+			version: '0.2',
+			phases: {
+				install: {
+					'runtime-versions': {
+						nodejs: '18',
+					},
+					commands: ['node -v'],
+				},
+				build: {
+					commands: [
+						'cd .\\cdk-code\\',
+						'npm install',
+						'cdk deploy --all --method=direct --require-approval never',
 						`aws ecs register-task-definition \
 						--cli-input-json '{
 							"family": "${taskDefinitionFamily}",
@@ -203,7 +274,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 	});
 
 	// Conceder permisos al CodeBuild project de deploy
-	deploy.addToRolePolicy(
+	deployWave2.addToRolePolicy(
 		new iam.PolicyStatement({
 			actions: ['sts:AssumeRole'],
 			resources: ['*'],
@@ -212,9 +283,11 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 
 	return {
 		linter,
+		synth,
 		unitTest,
 		security,
+		deployWave1,
 		build,
-		deploy,
+		deployWave2,
 	};
 };

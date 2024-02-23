@@ -45,69 +45,80 @@ export const appBuildActions = (scope: Construct, props: AppBuildActionsProps) =
 
 	// CodeBuild action Linting
 	const linting = new CodeBuildAction({
-		actionName: createName('codebuild', 'app-linting-action'),
+		actionName: createName('codebuild', 'linting-action'),
 		project: projects.linter,
 		input: sourceArtifact,
 	});
 
+	// Artifact del Synth
+	const nameBuildArtifactSynth = createName('artifact', 'build-synth');
+	const buildArtifactSynth = new Artifact(nameBuildArtifactSynth);
+	// CodeBuild action Synth
+	const synth = new CodeBuildAction({
+		actionName: createName('codebuild', 'synth-action'),
+		project: projects.synth,
+		input: sourceArtifact,
+		outputs: [buildArtifactSynth],
+	});
+
 	// CodeBuild action Unit Test
 	const unitTest = new CodeBuildAction({
-		actionName: createName('codebuild', 'app-unit-test-action'),
+		actionName: createName('codebuild', 'unit-test-action'),
 		project: projects.unitTest,
 		input: sourceArtifact,
 	});
 
 	// CodeBuild action Security
 	const security = new CodeBuildAction({
-		actionName: createName('codebuild', 'app-security-action'),
+		actionName: createName('codebuild', 'security-action'),
 		project: projects.security,
-		input: sourceArtifact,
-	});
-
-	// CodeBuild action Manual Approval Pre Build
-	const manualApprovalPreBuild = new ManualApprovalAction({
-		actionName: createName('codebuild', 'app-manual-approval-prebuild'),
-		additionalInformation: `Aprueba este paso si:
-
-		1. Se han creado los stacks: repository, database, email y sandbox (automático al iniciar el pipeline de la infraestructura).
-		2. Se ha configurado el .env en AWS Secrets Manager (manual, se configura una vez y en caso sea necesario).
-		3. Se ha ejecutado los comandos: php artisan migrate y php artisan db:seed en la sandbox (manual, solo se realiza la primera vez que se construye la app, en caso contrario omitir).`,
-	});
-
-	// Artifact del Build
-	const nameBuildArtifactBuild = createName('artifact', 'app-build');
-	const buildArtifactBuild = new Artifact(nameBuildArtifactBuild);
-	// CodeBuild action Build
-	const build = new CodeBuildAction({
-		actionName: createName('codebuild', 'app-build-action'),
-		project: projects.build,
-		input: sourceArtifact,
-		outputs: [buildArtifactBuild],
-	});
-
-	// CodeBuild action Manual Approval Post Build
-	const manualApprovalPreDeploy = new ManualApprovalAction({
-		actionName: createName('codebuild', 'app-manual-approval-postbuild'),
-		additionalInformation: `Aprueba este paso si:
-
-		1. Se ha desplegado el stack de los contenedores.`,
+		input: buildArtifactSynth,
 	});
 
 	// CodeBuild action Deploy
-	const deploy = new CodeBuildAction({
-		actionName: createName('codebuild', 'app-deploy-action'),
-		project: projects.deploy,
-		input: buildArtifactBuild,
+	const deployWave1 = new CodeBuildAction({
+		actionName: createName('codebuild', 'deploy-wave-1-action'),
+		project: projects.deployWave1,
+		input: sourceArtifact,
+	});
+
+	// CodeBuild action Build
+	const build = new CodeBuildAction({
+		actionName: createName('codebuild', 'build-action'),
+		project: projects.build,
+		input: sourceArtifact,
+	});
+
+	// CodeBuild action Manual Approval Post Build
+	const manualApproval = new ManualApprovalAction({
+		actionName: createName('codebuild', 'manual-approval'),
+		additionalInformation: `Aprueba este paso si:
+
+		1. Desea desplegar el resto de stacks faltantes (en caso ya tenga su infraestructura desplegada no será necesario volver a desplegarlos).
+		2. Desea crear una nueva revisión de la imagen.
+		
+		Para que no haya errores no olvide haber:
+
+		1. Haber importado los certificados correctamente.
+		2. Haber cofigurado el parameter store con los ARN de los certificados.`,
+	});
+
+	// CodeBuild action Deploy
+	const deployWave2 = new CodeBuildAction({
+		actionName: createName('codebuild', 'deploy-wave-2-action'),
+		project: projects.deployWave2,
+		input: sourceArtifact,
 	});
 
 	return {
 		source,
 		linting,
+		synth,
 		unitTest,
 		security,
-		manualApprovalPreBuild,
+		deployWave1,
 		build,
-		manualApprovalPreDeploy,
-		deploy,
+		manualApproval,
+		deployWave2,
 	};
 };
