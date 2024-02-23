@@ -142,7 +142,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				},
 				build: {
 					commands: [
-						`aws ecs register-task-definition --cli-input-json '{
+						`aws ecs register-task-definition \
+						--cli-input-json '{
 							"family": "${taskDefinitionFamily}",
 							"containerDefinitions": [
 								{
