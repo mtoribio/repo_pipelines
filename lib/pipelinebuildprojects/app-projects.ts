@@ -112,11 +112,6 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 	});
 
 	// Crear un CodeBuild para el Deploy Wave 1
-	const networkStack = createName('stack', 'network');
-	const repositoryStack = createName('stack', 'repository');
-	const databaseStack = createName('stack', 'database');
-	const emailStack = createName('stack', 'email');
-	const sandboxStack = createName('stack', 'sandbox');
 	const deployWave1 = new PipelineProject(scope, 'CodeBuildProjectDeployWave1', {
 		projectName: createName('codebuild', 'deploy-wave-1'),
 		environment: {
@@ -136,11 +131,12 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					commands: [
 						'cd .\\cdk-code\\',
 						'npm install',
-						`cdk deploy ${networkStack} --method=direct --require-approval never`,
-						`cdk deploy ${repositoryStack} --method=direct --require-approval never`,
-						`cdk deploy ${databaseStack} --method=direct --require-approval never`,
-						`cdk deploy ${emailStack} --method=direct --require-approval never`,
-						`cdk deploy ${sandboxStack} --method=direct --require-approval never`,
+						`stacks=${
+							props.env.environment === 'dev'
+								? `$(awk 'NR>1 && /^$/ {exit} { printf "%s ", buf; buf = $0 } NR == 1 { buf = $0 } END { printf "%s", buf }' stack-to-deploy.txt)`
+								: `$(awk '/^$/{flag=1; next} flag{printf "%s ", $0}' stack-to-deploy.txt)`
+						}`,
+						`cdk deploy $stacks --method=direct --require-approval never`,
 					],
 				},
 			},
@@ -234,8 +230,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 						'cd .\\cdk-code\\',
 						'npm install',
 						'cdk deploy --all --method=direct --require-approval never',
-						`aws ecs register-task-definition \
-						--cli-input-json '{
+						`aws ecs register-task-definition --cli-input-json '{
 							"family": "${taskDefinitionFamily}",
 							"containerDefinitions": [
 								{
@@ -288,6 +283,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 						}'
 					`,
 						`aws ecs update-service --cluster ${nameCluster} --service ${nameService} --task-definition ${taskDefinitionFamily}`,
+						`aws ecs wait services-stable --cluster ${nameCluster} --services ${nameService}`,
 					],
 				},
 			},
