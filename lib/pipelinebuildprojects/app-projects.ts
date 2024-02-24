@@ -54,7 +54,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					'runtime-versions': {
 						nodejs: '18',
 					},
-					commands: ['node -v'],
+					commands: ['node -v', 'sudo npm install -g aws-cdk'],
 				},
 				build: {
 					commands: ['cd .\\cdk-code\\', 'npm install', 'cdk synth'],
@@ -125,7 +125,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					'runtime-versions': {
 						nodejs: '18',
 					},
-					commands: ['node -v'],
+					commands: ['node -v', 'sudo npm install -g aws-cdk'],
 				},
 				build: {
 					commands: [
@@ -223,7 +223,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					'runtime-versions': {
 						nodejs: '18',
 					},
-					commands: ['node -v'],
+					commands: ['node -v', 'sudo npm install -g aws-cdk'],
 				},
 				build: {
 					commands: [
