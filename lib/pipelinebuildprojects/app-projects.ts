@@ -206,7 +206,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 
 	build.addToRolePolicy(
 		new iam.PolicyStatement({
-			actions: ['sts:AssumeRole', 'secretsmanager:GetSecretValue'],
+			actions: ['sts:AssumeRole', 'secretsmanager:GetSecretValue', 'ecr:GetAuthorizationToken'],
 			effect: iam.Effect.ALLOW,
 			resources: ['*'],
 		})
