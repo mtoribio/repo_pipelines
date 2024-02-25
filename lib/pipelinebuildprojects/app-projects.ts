@@ -203,6 +203,13 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 		}),
 	});
 
+	build.addToRolePolicy(
+		new iam.PolicyStatement({
+			actions: ['sts:AssumeRole'],
+			resources: ['*'],
+		})
+	);
+
 	const nameContainer = createName('ecs', 'container');
 	const taskDefinitionFamily = createName('ecs', 'task');
 	const nameGroupLogs = createName('cw', 'ecs-logs');
