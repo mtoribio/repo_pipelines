@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import { createName } from '../utils/createName';
 import { Pipeline, PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { appBuildActions } from './pipelinebuildactions/app-actions';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 
 export interface AppPipelineStackProps extends cdk.StackProps {
 	env: {
@@ -26,6 +27,17 @@ export class AppPipelineStack extends cdk.Stack {
 			repositoryName: createName('codecommit', 'app-repo'),
 		});
 
+		// Crear el bucket S3 para los Artefactos
+		const s3ArtifactsBucket = new s3.Bucket(this, 'S3Bucket', {
+			bucketName: createName('s3', 'app-pipeline-artifacts'),
+			enforceSSL: true,
+			accessControl: s3.BucketAccessControl.PRIVATE,
+			removalPolicy: cdk.RemovalPolicy.DESTROY,
+			autoDeleteObjects: true,
+			blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+			encryption: s3.BucketEncryption.S3_MANAGED,
+		});
+
 		// Crear los build actions
 		const actions = appBuildActions(this, props);
 
@@ -33,6 +45,7 @@ export class AppPipelineStack extends cdk.Stack {
 		new Pipeline(this, 'AppPipeline', {
 			pipelineName: createName('codepipeline', 'app-pipeline'),
 			pipelineType: PipelineType.V1,
+			artifactBucket: s3ArtifactsBucket,
 			enableKeyRotation: true,
 			stages: [
 				{
