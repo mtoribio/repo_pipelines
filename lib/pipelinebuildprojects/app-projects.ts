@@ -34,7 +34,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					commands: ['node -v'],
 				},
 				build: {
-					commands: ['cd .\\cdk-code\\', 'npm install', 'npm run eslint'],
+					commands: ['cd ./cdk-code', 'npm install', 'npm run eslint'],
 				},
 			},
 		}),
@@ -57,7 +57,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					commands: ['node -v', 'sudo npm install -g aws-cdk'],
 				},
 				build: {
-					commands: ['cd .\\cdk-code\\', 'npm install', 'cdk synth'],
+					commands: ['cd ./cdk-code', 'npm install', 'cdk synth'],
 				},
 			},
 			artifacts: {
@@ -103,7 +103,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				},
 				build: {
 					commands: [
-						'cd .\\cdk-code\\',
+						'cd ./cdk-code',
 						'find ./cdk.out -type f -name "*.template.json" | xargs -I{} cfn_nag_scan --deny-list-path cfn-nag-deny-list.yml --input-path {}',
 					],
 				},
@@ -129,7 +129,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				},
 				build: {
 					commands: [
-						'cd .\\cdk-code\\',
+						'cd ./cdk-code',
 						'npm install',
 						`stacks=${
 							props.env.environment === 'dev'
@@ -227,7 +227,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				},
 				build: {
 					commands: [
-						'cd .\\cdk-code\\',
+						'cd ./cdk-code',
 						'npm install',
 						'cdk deploy --all --method=direct --require-approval never',
 						`aws ecs register-task-definition --cli-input-json '{
