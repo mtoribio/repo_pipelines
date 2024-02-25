@@ -6,6 +6,7 @@ export const dev = {
 	appRepo: 'repo_app',
 	appBranch: 'development',
 	accountId: '884162918988',
+	imageTag: 'latest',
 };
 
 export const prod = {
@@ -16,4 +17,5 @@ export const prod = {
 	appRepo: 'NewHRMv2.0',
 	appBranch: 'main',
 	accountId: '364964202465',
+	imageTag: 'latest',
 };

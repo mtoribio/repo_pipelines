@@ -15,6 +15,7 @@ export interface AppPipelineStackProps extends cdk.StackProps {
 		appRepo: string;
 		appBranch: string;
 		accountId: string;
+		imageTag: string;
 	};
 }
 

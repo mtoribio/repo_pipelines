@@ -18,6 +18,7 @@ export interface AppBuildActionsProps {
 		appRepo: string;
 		appBranch: string;
 		accountId: string;
+		imageTag: string;
 	};
 }
 

@@ -13,6 +13,7 @@ export interface AppBuildProjectsProps {
 		appRepo: string;
 		appBranch: string;
 		accountId: string;
+		imageTag: string;
 	};
 }
 
@@ -196,8 +197,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 						'echo "DB_PASSWORD=$DB_PASSWORD" >> .env',
 						`aws ecr get-login-password --region ${props.env.region} | docker login --username AWS --password-stdin ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com`,
 						`docker build -t ${nameRepository} .`,
-						`docker tag ${nameRepository}:latest ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
-						`docker push ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
+						`docker tag ${nameRepository}:${props.env.imageTag} ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:${props.env.imageTag}`,
+						`docker push ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:${props.env.imageTag}`,
 					],
 				},
 			},
@@ -244,7 +245,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 							"containerDefinitions": [
 								{
 									"name": "${nameContainer}",
-									"image": "${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest",
+									"image": "${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:${props.env.imageTag}",
 									"cpu": 0,
 									"portMappings": [
 										{
