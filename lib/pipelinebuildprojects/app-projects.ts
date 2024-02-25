@@ -194,6 +194,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 						'echo "DB_DATABASE=$DB_DATABASE" >> .env',
 						'echo "DB_USERNAME=$DB_USERNAME" >> .env',
 						'echo "DB_PASSWORD=$DB_PASSWORD" >> .env',
+						`aws ecr get-login-password --region ${props.env.region} | docker login --username AWS --password-stdin ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com`,
 						`docker build -t ${nameRepository} .`,
 						`docker tag ${nameRepository}:latest ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
 						`docker push ${props.env.accountId}.dkr.ecr.${props.env.region}.amazonaws.com/${nameRepository}:latest`,
