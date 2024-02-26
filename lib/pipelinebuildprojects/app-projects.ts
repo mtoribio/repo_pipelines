@@ -216,7 +216,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 	const nameContainer = createName('ecs', 'container');
 	const taskDefinitionFamily = createName('ecs', 'task');
 	const nameGroupLogs = createName('cw', 'ecs-logs');
-	const nameTaskRole = createName('iam', 'task-execution-role');
+	const nameTaskExecutionRole = createName('iam', 'task-execution-role');
+	const nameTaskRole = createName('iam', 'task-role');
 	const nameCluster = createName('ecs', 'cluster');
 	const nameService = createName('ecs', 'service');
 	// Crear un CodeBuild para Deploy Wave 2
@@ -275,8 +276,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 									"credentialSpecs": []
 								}
 							],
-							"taskRoleArn": "arn:aws:iam::${props.env.accountId}:role/hrmgo-${props.env.region}-stack-${props.env.environment}-TaskDefinitionTaskRoleFD4-r2TzM6S8v4SA",
-							"executionRoleArn": "arn:aws:iam::${props.env.accountId}:role/${nameTaskRole}",
+							"taskRoleArn": "arn:aws:iam::${props.env.accountId}:role/${nameTaskRole}",
+							"executionRoleArn": "arn:aws:iam::${props.env.accountId}:role/${nameTaskExecutionRole}",
 							"networkMode": "awsvpc",
 							"requiresCompatibilities": ["FARGATE"],
 							"cpu": "2048",
