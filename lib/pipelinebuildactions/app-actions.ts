@@ -94,7 +94,7 @@ export const appBuildActions = (scope: Construct, props: AppBuildActionsProps) =
 		actionName: createName('codebuild', 'manual-approval'),
 		additionalInformation: `Aprueba este paso si:
 
-		1. Desea desplegar el resto de stacks faltantes (en caso ya tenga su infraestructura desplegada no será necesario volver a desplegarlos).
+		1. Desea desplegar el resto de stacks faltantes (en caso ya tenga su infraestructura desplegada detectará cambios y en caso no encuentre simplemente lo omitirá).
 		2. Desea crear una nueva revisión de la imagen (desplegar en los contenedores una nueva versión de la imagen de su proyecto).
 		
 		Para que no haya errores no olvide:
