@@ -133,8 +133,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 						'npm install',
 						`stacks=${
 							props.env.environment === 'dev'
-								? `$(awk 'NR>1 && /^$/ {exit} { printf "%s ", buf; buf = $0 } NR == 1 { buf = $0 } END { printf "%s", buf }' stack-to-deploy.txt)`
-								: `$(awk '/^$/{flag=1; next} flag{printf "%s ", $0}' stack-to-deploy.txt)`
+								? `$(awk 'NR>1 && /^$/ {exit} { printf "%s ", buf; buf = $0 } NR == 1 { buf = $0 } END { printf "%s", buf }' stacks-to-deploy.txt)`
+								: `$(awk '/^$/{flag=1; next} flag{printf "%s ", $0}' stacks-to-deploy.txt)`
 						}`,
 						`cdk deploy $stacks --method=direct --require-approval never`,
 					],

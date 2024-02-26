@@ -95,12 +95,12 @@ export const appBuildActions = (scope: Construct, props: AppBuildActionsProps) =
 		additionalInformation: `Aprueba este paso si:
 
 		1. Desea desplegar el resto de stacks faltantes (en caso ya tenga su infraestructura desplegada no será necesario volver a desplegarlos).
-		2. Desea crear una nueva revisión de la imagen.
+		2. Desea crear una nueva revisión de la imagen (desplegar en los contenedores una nueva versión de la imagen de su proyecto).
 		
-		Para que no haya errores no olvide haber:
+		Para que no haya errores no olvide:
 
 		1. Haber importado los certificados correctamente.
-		2. Haber cofigurado el parameter store con los ARN de los certificados.`,
+		2. Haber configurado el parameter store con los ARN de los certificados.`,
 	});
 
 	// CodeBuild action Deploy
