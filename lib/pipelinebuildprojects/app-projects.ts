@@ -40,6 +40,8 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 		}),
 	});
 
+	// Nombre del synth artifact
+	const nameSynthArtifact = createName('artifact', 'build-synth');
 	// Crear un CodeBuild para Synth
 	const synth = new PipelineProject(scope, 'CodeBuildProjectSynth', {
 		projectName: createName('codebuild', 'synth'),
@@ -64,6 +66,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				'base-directory': '.',
 				files: ['**/*'],
 				'exclude-paths': ['node_modules/**'],
+				name: `${nameSynthArtifact}-$(date +%Y-%m-%d)`,
 			},
 		}),
 	});
