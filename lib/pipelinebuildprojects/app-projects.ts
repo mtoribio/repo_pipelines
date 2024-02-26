@@ -315,14 +315,6 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 		})
 	);
 
-	deployWave2.addToRolePolicy(
-		new iam.PolicyStatement({
-			principals: [new iam.ServicePrincipal('ecs.amazonaws.com')],
-			actions: ['sts:AssumeRole'],
-			resources: ['*'],
-		})
-	);
-
 	return {
 		linter,
 		synth,
