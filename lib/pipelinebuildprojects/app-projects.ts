@@ -309,6 +309,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				'ecs:UpdateService',
 				'ecs:DescribeServices',
 				'ecs:TagResource',
+				'iam:PassRole',
 			],
 			resources: ['*'],
 		})
