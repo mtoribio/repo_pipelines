@@ -303,7 +303,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 	// Conceder permisos al CodeBuild project de deploy
 	deployWave2.addToRolePolicy(
 		new iam.PolicyStatement({
-			actions: ['sts:AssumeRole'],
+			actions: ['sts:AssumeRole', 'ecs:RegisterTaskDefinition', 'ecs:UpdateService', 'ecs:DescribeServices'],
 			resources: ['*'],
 		})
 	);
