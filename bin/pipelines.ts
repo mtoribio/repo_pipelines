@@ -6,7 +6,7 @@ import { environments } from './environments';
 
 const app = new cdk.App();
 
-const config = app.node.tryGetContext('config');
+const config: string = app.node.tryGetContext('config');
 if (!config) throw new Error("Context variable missing on CDK command. Pass in as '-c config=XXX'");
 
 const env = environments[config];
