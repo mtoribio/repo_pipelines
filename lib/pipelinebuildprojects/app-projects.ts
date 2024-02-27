@@ -57,7 +57,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					commands: ['node -v', 'sudo npm install -g aws-cdk'],
 				},
 				build: {
-					commands: ['cd ./cdk-code', 'npm install', 'cdk synth'],
+					commands: ['cd ./cdk-code', 'npm install', `cdk synth -c config=${props.env.environment}`],
 				},
 			},
 			artifacts: {
@@ -136,7 +136,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 								? `$(awk 'NR>1 && /^$/ {exit} { printf "%s ", buf; buf = $0 } NR == 1 { buf = $0 } END { printf "%s", buf }' stacks-to-deploy.txt)`
 								: `$(awk '/^$/{flag=1; next} flag{printf "%s ", $0}' stacks-to-deploy.txt)`
 						}`,
-						`cdk deploy $stacks --method=direct --require-approval never`,
+						`cdk deploy $stacks -c config=${props.env.environment} --method=direct --require-approval never`,
 					],
 				},
 			},
@@ -239,7 +239,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					commands: [
 						'cd ./cdk-code',
 						'npm install',
-						'cdk deploy --all --method=direct --require-approval never',
+						`cdk deploy --all -c config=${props.env.environment} --method=direct --require-approval never`,
 						`aws ecs register-task-definition --cli-input-json '{
 							"family": "${taskDefinitionFamily}",
 							"containerDefinitions": [
