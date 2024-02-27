@@ -13,10 +13,10 @@ export const environments: { [key: string]: Environment } = {
 		region: 'us-east-2',
 		project: 'hrmgo',
 		environment: 'dev',
-		ownerAccount: 'mtoribio',
-		appRepo: 'repo_app',
-		appBranch: 'development',
-		accountId: '884162918988',
+		ownerAccount: 'overalldev',
+		appRepo: 'NewHRMv2.0',
+		appBranch: 'dev_morrison',
+		accountId: '364964202465',
 	},
 
 	prod: {
