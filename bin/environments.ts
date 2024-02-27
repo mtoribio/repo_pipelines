@@ -25,7 +25,7 @@ export const environments: { [key: string]: Environment } = {
 		environment: 'prod',
 		ownerAccount: 'overalldev',
 		appRepo: 'NewHRMv2.0',
-		appBranch: 'main',
+		appBranch: 'master',
 		accountId: '364964202465',
 	},
 };
