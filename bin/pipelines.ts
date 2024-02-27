@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { createName } from '../utils/createName';
 import { AppPipelineStack } from '../lib/pipeline-app-stack';
-import { dev as env } from '../bin/environments';
+
+import { environments } from './environments';
 
 const app = new cdk.App();
 
-const { project } = env;
+const config = app.node.tryGetContext('config');
+if (!config) throw new Error("Context variable missing on CDK command. Pass in as '-c config=XXX'");
+
+const env = environments[config];
+const { project, region, environment } = env;
+
+export const createName = (resource: string, functionality: string) =>
+	`${project}-${region}-${resource}-${environment}-${functionality}`;
 
 const appPipelineStack = new AppPipelineStack(app, createName('stack', 'app-pipeline'), { env });
 

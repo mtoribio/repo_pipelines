@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { PipelineProject, BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
-import { createName } from '../../utils/createName';
+import { createName } from '../../bin/pipelines';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 

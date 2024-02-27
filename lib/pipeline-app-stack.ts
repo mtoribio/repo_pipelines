@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as codecommit from 'aws-cdk-lib/aws-codecommit';
 import { Construct } from 'constructs';
-import { createName } from '../utils/createName';
+import { createName } from '../bin/pipelines';
 import { Pipeline, PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import { appBuildActions } from './pipelinebuildactions/app-actions';
 import * as s3 from 'aws-cdk-lib/aws-s3';

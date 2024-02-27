@@ -5,7 +5,7 @@ import {
 	ManualApprovalAction,
 } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { appBuildProjects } from '../pipelinebuildprojects/app-projects';
-import { createName } from '../../utils/createName';
+import { createName } from '../../bin/pipelines';
 import { Construct } from 'constructs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 
