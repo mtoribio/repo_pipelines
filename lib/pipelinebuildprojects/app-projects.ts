@@ -104,7 +104,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 				build: {
 					commands: [
 						'cd ./cdk-code',
-						'find ./cdk.out -type f -name "*.template.json" | xargs -I{} cfn_nag_scan --deny-list-path cfn-nag-deny-list.yml --input-path {}',
+						'find ./cdk.out -type f -name "*.template.json" | xargs -I {} cfn_nag_scan --deny-list-path cfn-nag-deny-list.yml --input-path {}',
 					],
 				},
 			},
@@ -112,6 +112,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 	});
 
 	// Crear un CodeBuild para el Deploy Wave 1
+	const template = createName('stack', '');
 	const deployWave1 = new PipelineProject(scope, 'CodeBuildProjectDeployWave1', {
 		projectName: createName('codebuild', 'deploy-wave-1'),
 		environment: {
@@ -131,12 +132,7 @@ export const appBuildProjects = (scope: Construct, props: AppBuildProjectsProps)
 					commands: [
 						'cd ./cdk-code',
 						'npm install',
-						`stacks=${
-							props.env.environment === 'dev'
-								? `$(awk 'NR>1 && /^$/ {exit} { printf "%s ", buf; buf = $0 } NR == 1 { buf = $0 } END { printf "%s", buf }' stacks-to-deploy.txt)`
-								: `$(awk '/^$/{flag=1; next} flag{printf "%s ", $0}' stacks-to-deploy.txt)`
-						}`,
-						`cdk deploy $stacks -c config=${props.env.environment} --method=direct --require-approval never`,
+						`cat stacks-to-deploy-wave-1.json | jq -r '.[]' | xargs -I {} sh -c 'cdk deploy ${template}{} -c config=${props.env.environment} --method=direct --require-approval never || exit 255'`,
 					],
 				},
 			},
